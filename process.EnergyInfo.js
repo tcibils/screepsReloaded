@@ -3,19 +3,18 @@
 // And we try not to assess potential home rooms if it's not useful - sources in distant room do not change place
 
 
+// Objective : for each source in memory, wether in my room or not, and process the information to define needs for harvesters, or fatHarvester system, or link system.
+// Then each room should have a script to fill the needs I believe
+
+
 var processLDEnergyInfo = {
     run: function() {
+
 		// Do all that every 2000 or 5000 turns for instance - we only need to update it if I got a new room
         if(Game.time % 1000 == 0) {
 			// For every room in memory
 			for(var roomInMemory in Memory.rooms) {
-				// If there has been an update recently, then we do stuff.
-				if(Memory.rooms[roomInMemory].recentUpdate == True) {
-					
-
-					// Finally, we register that the update has been processed.
-					Memory.rooms[roomInMemory].recentUpdate = False;
-				}
+				
 			}
 
 			let distancePerCreepUnit = 40;

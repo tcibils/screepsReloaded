@@ -12,11 +12,13 @@ var scout = {
 		if(creep.room.memory.sources == undefined)				{creep.room.memory.sources = [];}
 		if(creep.room.memory.sourcesPos == undefined)			{creep.room.memory.sourcesPos = [];}
 		if(creep.room.memory.sourcesMax == undefined)			{creep.room.memory.sourcesMax = [];}
+		if(creep.room.memory.sourceUpdate == undefined) 		{creep.room.memory.sourceUpdate = false;}
 		// Controller
 		if(creep.room.memory.controller == undefined)			{creep.room.memory.controller = "undefined";}
 		if(creep.room.memory.controllerPos == undefined)		{creep.room.memory.controllerPos = "undefined";}
 		if(creep.room.memory.roomOwner == undefined)			{creep.room.memory.roomOwner = "undefined"}
 		if(creep.room.memory.roomOwnerReservation == undefined)	{creep.room.memory.roomOwnerReservation = "undefined"}
+		if(creep.room.memory.controllerUpdate == undefined) 	{creep.room.memory.controllerUpdate = false;}
 		// Power
 		if(creep.room.memory.powerSources == undefined)			{creep.room.memory.powerSources = [];}
 		if(creep.room.memory.powerSourcesPos == undefined)		{creep.room.memory.powerSourcesPos = [];}
@@ -26,8 +28,8 @@ var scout = {
 		if(creep.room.memory.powerSourcesTime == undefined)		{creep.room.memory.powerSourcesTime = [];}
 		if(creep.room.memory.powerSourcesDiscoveryTime == undefined) {creep.room.memory.powerSourcesDiscoveryTime = [];}
 		if(creep.room.memory.powerSourceFreeSpots == undefined)	{creep.room.memory.powerSourceFreeSpots = [];}
+		if(creep.room.memory.powerUpdate == undefined) 			{creep.room.memory.powerUpdate = false;}
 		// Global
-		if(creep.room.memory.recentUpdate == undefined)			{creep.room.memory.recentUpdate = false;}
 
 		
 		// Global
@@ -53,6 +55,8 @@ var scout = {
 					creep.room.memory.sourcesMax.push(sourcesOfRoom[currentSourceIndex].energyCapacity);
 					creep.room.memory.sourcesPos.push(sourcesOfRoom[currentSourceIndex].pos);
 				}
+				// Sources capacity may change. We record an update.
+				creep.room.memory.sourceUpdate = true;
 			}
 
 			// Storing controller information: ID, position, owner
@@ -61,8 +65,8 @@ var scout = {
 				creep.room.memory.controllerPos = creep.room.controller.pos;
 				
 				// Storing room owner name and reservation
-				if(creep.room.memory.roomOwner != creep.room.controller.owner) 								{creep.room.memory.roomOwner = creep.room.controller.owner;}
-				if(creep.room.memory.roomOwnerReservation != creep.room.controller.reservation.username)	{creep.room.memory.roomOwnerReservation = creep.room.controller.reservation.username;}
+				if(creep.room.memory.roomOwner != creep.room.controller.owner) 								{creep.room.memory.roomOwner = creep.room.controller.owner; creep.room.memory.controllerUpdate = true;}
+				if(creep.room.memory.roomOwnerReservation != creep.room.controller.reservation.username)	{creep.room.memory.roomOwnerReservation = creep.room.controller.reservation.username; creep.room.memory.controllerUpdate = true;}
 			}
 			
 			// Power sources
@@ -94,11 +98,12 @@ var scout = {
 					}
 					creep.room.memory.powerSourceFreeSpots.push(counter);
 				}
+				// We register that the information has been updated by the creep.
+				// This will be set again to false once the information is processed in another module.
+				creep.room.memory.powerUpdate = true;
 			}
 
-			// We register that the information has been updated by the creep.
-			// This will be set again to false once the information is processed in another module.
-			creep.room.memory.recentUpdate = true;
+			
 
 			// --------- FIND EXIT ------------------		
 			// We define the possibilities, checking which exit exist
