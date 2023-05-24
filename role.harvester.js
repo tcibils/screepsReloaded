@@ -1,13 +1,41 @@
-var placesOfSource = require('get.placesOfSource');
-var freeSpotsOfSource = require('get.freeSpotsOfSource');
 var getDepositTarget = require('get.depositTarget');
 
-var roomNumbering = require('roomNumbering');
+// The harvester should not have to know what source harvesting it has been spawned for
+// So the script deciding to spawn him should also assign him a source, which we will use here
+// So we should look in memory for the ID of the source attached, and move back and forth to gather and deposit, I guess
 
 var roleHarvester = {
 
     /** @param {Creep} creep **/
     run: function(creep) {
+        // Error if there's been an issue
+        if(creep.memory.targetSourceID == undefined) {console.log("ISSUE : for creep " + creep.name + ", no source attached!")}
+        else {
+            // If creep is not filled with energy, it will go search for energy
+            if(creep.carry.energy < creep.carryCapacity) {
+                // If we are too far to harvest, we move forward
+                // If we are close enough, the creep will mine.
+                if(creep.harvest(Game.getObjectById(creep.memory.targetSourceID)) == ERR_NOT_IN_RANGE) {
+                    creep.moveTo(Game.getObjectById(creep.memory.targetSourceID), {visualizePathStyle: {stroke: '#ffaa00'}});
+                }
+            }
+            // If the creep is filled, then move to best deposit
+            else {
+                // As per the function dedicated to find where the energy should be deposited
+                getDepositTarget.run(creep);
+
+                if(creep.transfer(Game.getObjectById(creep.memory.depositTarget), RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+                    creep.moveTo(Game.getObjectById(creep.memory.depositTarget), {visualizePathStyle: {stroke: '#ffffff'}});
+                }
+            }
+        }
+    }
+};
+
+
+
+/* OLDIE BELOW
+
         // If we have no source attached in memory or if variable is not even defined
         if(creep.memory.isThereAFirstSourceAttached == undefined) {
             // Then we have none indeed.
@@ -108,5 +136,7 @@ var roleHarvester = {
 	    }
     }
 };
+*/
+
 
 module.exports = roleHarvester;
