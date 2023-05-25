@@ -13,6 +13,7 @@ var scout = {
 		if(creep.room.memory.sourcesPos == undefined)			{creep.room.memory.sourcesPos = [];}
 		if(creep.room.memory.sourcesMax == undefined)			{creep.room.memory.sourcesMax = [];}
 		if(creep.room.memory.sourceUpdate == undefined) 		{creep.room.memory.sourceUpdate = false;}
+		if(creep.room.memory.sourcesHomeAttachedLastTime == undefined)	{creep.room.memory.sourcesHomeAttachedLastTime = [];}
 		// Controller
 		if(creep.room.memory.controller == undefined)			{creep.room.memory.controller = "undefined";}
 		if(creep.room.memory.controllerPos == undefined)		{creep.room.memory.controllerPos = "undefined";}
@@ -48,14 +49,29 @@ var scout = {
 			// --------- STORE INFORMATION ------------------
 			
 			// Storing sources information
-			var sourcesOfRoom = creep.room.find(FIND_SOURCES);
-			if(sourcesOfRoom.length > 0) {
-				for(let currentSourceIndex= 0; currentSourceIndex<sourcesOfRoom.length; currentSourceIndex++) {
-					creep.room.memory.sources.push(sourcesOfRoom[currentSourceIndex].id);
-					creep.room.memory.sourcesMax.push(sourcesOfRoom[currentSourceIndex].energyCapacity);
-					creep.room.memory.sourcesPos.push(sourcesOfRoom[currentSourceIndex].pos);
+			// If there is nothing in memory, we store all information
+			if(creep.room.memory.sources.length == 0) {
+				var sourcesOfRoom = creep.room.find(FIND_SOURCES);
+				if(sourcesOfRoom.length > 0) {
+					for(let currentSourceIndex= 0; currentSourceIndex<sourcesOfRoom.length; currentSourceIndex++) {
+						creep.room.memory.sources.push(sourcesOfRoom[currentSourceIndex].id);
+						creep.room.memory.sourcesMax.push(sourcesOfRoom[currentSourceIndex].energyCapacity);
+						creep.room.memory.sourcesPos.push(sourcesOfRoom[currentSourceIndex].pos);
+						creep.room.memory.sourcesHomeAttachedLastTime.push("undefined")
+					}
+					// Sources capacity may change. We record an update. Can be refined later.
+					creep.room.memory.sourceUpdate = true;
 				}
-				// Sources capacity may change. We record an update.
+			}
+			// If there is already something stored for sources, the only thing that could change is energy capacity of sources, so we check if that changed.
+			else if(creep.room.memory.sources.length > 0) {
+				var sourcesOfRoom = creep.room.find(FIND_SOURCES);
+				for(let currentSourceIndex= 0; currentSourceIndex<sourcesOfRoom.length; currentSourceIndex++) {
+					if(sourcesOfRoom[currentSourceIndex].energyCapacity != creep.room.memory.sourcesMax[currentSourceIndex] ) {
+						creep.room.memory.sourcesMax[currentSourceIndex] = sourcesOfRoom[currentSourceIndex].energyCapacity;
+					}
+				}
+				// Sources capacity may change. We record an update. Can be refined later.
 				creep.room.memory.sourceUpdate = true;
 			}
 

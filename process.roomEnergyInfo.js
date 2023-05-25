@@ -12,6 +12,9 @@ var processLDEnergyInfo = {
 
 		let startCPUused = Game.cpu.getUsed();
 
+		// We re-check that each source has optimal attachement every intervalForUpdate ticks
+		// This is a very costly thing, so we really want to do it rarely enough
+		let intervalForUpdate = 1000;
 
 		// This shit is gonna be extremly costly in CPU
 		// PathFinder.search is very costly
@@ -23,6 +26,26 @@ var processLDEnergyInfo = {
 			// If there are memorized sources
 			if(Memory.rooms[roomInMemory].sources != undefined) {
 				if(Memory.rooms[roomInMemory].sources.length > 0) {
+					// For each of these sources
+					for(let sourceIndex = 0; sourceIndex < Memory.rooms[roomInMemory].sources.length; sourceIndex++) {
+						// If there has been no update since intervalForUpdate ticks, or if there has been an update, or if it's never been done
+						if(Game.time - Memory.rooms[roomInMemory].sourcesHomeAttachedLastTime > intervalForUpdate || creep.room.memory.sourceUpdate || Memory.rooms[roomInMemory].sourcesHomeAttachedLastTime == 'undefined') {
+
+							// Now we have a source in a room in memory that has not been updated since a long time, or had an update, or never
+							// For that source, we need to attach a home room for exploitation
+							// We will do that by checking the closest spawn
+
+
+
+
+
+
+
+
+							// And finally, we update the last source update
+							Memory.rooms[roomInMemory].sourcesHomeAttachedLastTime = Game.time;
+						}
+					}
 					// We look in our rooms
 					for(var myRoomIndex in Game.rooms) {
 						// If there is at least a spawn
@@ -38,6 +61,10 @@ var processLDEnergyInfo = {
 			}
 		}
 
+
+
+
+		/*
 		let distancePerCreepUnit = 40;
 		
 		// Arbitrary number of max distance
@@ -371,6 +398,7 @@ var processLDEnergyInfo = {
 		}
 		let resultCPUused = startCPUused - Game.cpu.getUsed();
 		console.log("CPU used during room energy processing: " + resultCPUused);
+		*/
     }
 
 
