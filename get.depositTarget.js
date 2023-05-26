@@ -1,10 +1,39 @@
+// Deposit in storage, if none then container, if none then spawn
+// Requires creep spawned to have a "homeRoom" in memory
 
-var depositTargetUnderlying = require('get.depositTargetUnderlying');
-
-// This function defined the conditions depending on which we'll look for a new desposit target.
 
 var depositTarget = {
      run: function(creep) {
+
+
+        var homeRoomStorage = Game.rooms[creep.memory.homeRoom].find(FIND_STRUCTURES, {filter: (structure) => {return (structure.structureType == STRUCTURE_STORAGE);}});
+        var homeRoomContainers = Game.rooms[creep.memory.homeRoom].find(FIND_STRUCTURES, {filter: (structure) => {return (structure.structureType == STRUCTURE_CONTAINER);}});
+        var homeRoomSpawns = Game.rooms[creep.memory.homeRoom].find(FIND_STRUCTURES, {filter: (structure) => {return (structure.structureType == STRUCTURE_SPAWN);}});
+
+        if(homeRoomStorage.length > 0) {
+            // There is only one storage
+            creep.memory.depositTarget = homeRoomStorage[0].id;
+        }
+        else if(homeRoomContainers.length > 0) {
+            // We build only one container for now
+            creep.memory.depositTarget = homeRoomContainers[0].id;
+        }
+
+        else if(homeRoomSpawns.length > 0) {
+            // We have only one spawn for now
+            creep.memory.depositTarget = homeRoomSpawns[0].id;
+        }
+
+        else {
+            creep.say("No storage target");
+            console.log("For creep " + creep.name + ", no storage target found.")
+        }
+    }
+};
+
+module.exports = depositTarget;
+
+        /*
         // Control variables leting us set the maximum in each type of storage before moving on to the extensions and spawn
         let maximumFillingOfContainer = 1750;
         let maximumFillingOfStorage = 37500; 
@@ -90,5 +119,5 @@ var depositTarget = {
         }
     }
 };
+*/        
 
-module.exports = depositTarget;

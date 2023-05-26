@@ -12,10 +12,13 @@ var processLDEnergyInfo = {
 
 		let startCPUused = Game.cpu.getUsed();
 
+		// What we need here is a few triggers to know when the algo needs to be run again
+		// As checking distances for far away sources is costly in CPU
+		
 		// We re-check that each source has optimal attachement every intervalForUpdate ticks
 		// This is a very costly thing, so we really want to do it rarely enough
 		let intervalForUpdate = 1000;
-
+		let myRooms = _.filter(Game.rooms, (currentRoom) => currentRoom.controller != undefined && currentRoom.controller.my);
 		// This shit is gonna be extremly costly in CPU
 		// PathFinder.search is very costly
 
@@ -35,31 +38,35 @@ var processLDEnergyInfo = {
 							// For that source, we need to attach a home room for exploitation
 							// We will do that by checking the closest spawn
 
+							for(let myRoomIndex = 0; myRoomIndex < myRooms.length; myRoomIndex++) {
+								// We only check with close enough rooms
+								if(Game.map.getRoomLinearDistance(roomInMemory,myRooms[myRoomIndex].name) <= 3) {
+									
+									// Quick win: just take any one. At the start I'll only have one room anyway.
+									// Should have been : Find the closest spawn from all these rooms, attach it as home spawn
+									Memory.rooms[roomInMemory].sourcesHomeRoom = myRooms[myRoomIndex].name;
 
-
-
-
-
-
+								}
+							}
 
 							// And finally, we update the last source update
 							Memory.rooms[roomInMemory].sourcesHomeAttachedLastTime = Game.time;
 						}
 					}
-					// We look in our rooms
-					for(var myRoomIndex in Game.rooms) {
-						// If there is at least a spawn
-						if(Memory.rooms[myRoomIndex].spawns.length > 0) {
-							// We evaluate it as a potential close candidate
-							for(var spawnIndex = 0; spawnIndex < Memory.rooms[myRoomIndex].spawns.length; spawnIndex++)
-								var distance = Memory.rooms[myRoomIndex].findPath(Memory.rooms[myRoomIndex].spawns[spawnIndex].pos);
-						}				
-					}
-					// Find the closest spawn
-					// Attach it as home spawn
+
+					
 				}
 			}
 		}
+
+		let totalCPUused = startCPUused - Game.cpu.getUsed();
+		console.log("We used " + totalCPUused + " of CPU to attach home rooms to spawns.")
+    }
+}
+
+
+
+module.exports = processLDEnergyInfo;
 
 
 
@@ -399,9 +406,3 @@ var processLDEnergyInfo = {
 		let resultCPUused = startCPUused - Game.cpu.getUsed();
 		console.log("CPU used during room energy processing: " + resultCPUused);
 		*/
-    }
-
-
-}
-
-module.exports = processLDEnergyInfo;
